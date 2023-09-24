@@ -96,9 +96,9 @@ impl MongoRepo {
                 sha.input_str(user.password.as_str());
                 if x.password == sha.result_str() {
                     // JWT
-                    let _config: Config = Config {};
-                    let _var = _config.jwt_secret;
-                    let key = _var.as_bytes();
+                    // let _config: Config = Config {};
+                    // let _var = _config.jwt_secret;
+                    // let key = _var.as_bytes();
 
                     let mut _date: DateTime<Utc>;
                     // Remember Me

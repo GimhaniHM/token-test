@@ -1,7 +1,6 @@
 use std::env;
 extern crate dotenv;
 use actix_web::{HttpRequest, HttpResponse, Responder};
-use chrono::Utc;
 
 // use crypto::digest::Digest;
 // use crypto::sha2::Sha256;
@@ -30,7 +29,7 @@ use mongodb::{
 use crate::model::user_model::{User, RegisterUserSchema, LoginUserSchema, TokenClaims};
 use crate::model::response::{LoginResponse, Response};
 
-crate::config::config;
+use crate::config::config::Config;
 
 pub struct MongoRepo {
     col: Collection<User>,
@@ -98,7 +97,7 @@ impl MongoRepo {
                 if x.password == sha.result_str() {
                     // JWT
                     let _config: Config = Config {};
-                    let _var = _config.get_config_with_key("SECRET_KEY");
+                    let _var = _config.jwt_secret;
                     let key = _var.as_bytes();
 
                     let mut _date: DateTime<Utc>;

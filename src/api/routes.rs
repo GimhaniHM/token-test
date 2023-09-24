@@ -1,12 +1,13 @@
-use crate::{model::user_model::{User, RegisterUserSchema},repository::mongodb_repo::MongoRepo, AppState};
+use crate::{model::user_model::{User, RegisterUserSchema, LoginUserSchema}, AppState};
 use serde_json::json;
 
 use actix_web::{
     post,get,
     web,
-    web::{Data, Json, Path},
+    web::{Data, Json, Path, service},
     HttpResponse,
     Responder,
+    http::StatusCode,
 };
 
 
@@ -44,14 +45,16 @@ pub async fn create_user(data: web::Data<AppState>, new_user: Json<User>) -> Htt
 }
 
 #[post("/login")]
-pub async fn login_user(data: web::Data<AppState>, user: Json<User>) -> HttpResponse {
+pub async fn login_user(data: web::Data<AppState>, user: Json<LoginUserSchema>) -> HttpResponse {
     let db = data.db.clone();
 
     let login_detail = db.login_user(user.into_inner());
 
-    match login_detail {
-        Ok(user) => HttpResponse::Ok().json(login_detail.unwrap()),
-        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+    match login_detail.await {
+        Ok(user) => HttpResponse::Ok().json(login_detail),
+        Err(_) => HttpResponse::Ok()
+            .status(StatusCode::from_u16(401).unwrap())
+            .json(login_detail.await.unwrap_err()),
     }
 }
 
@@ -76,5 +79,6 @@ pub async fn login_user(data: web::Data<AppState>, user: Json<User>) -> HttpResp
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(create_user)
-        .service(index);
+        .service(index)
+        .service(login_user);
 }
